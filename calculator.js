@@ -1,48 +1,94 @@
 const display = document.querySelector('#display');
 
-const multiplybtn = document.querySelector('#multiply');
-const dividebtn = document.querySelector('#divide');
-const addbtn = document.querySelector('#add');
-const subtractbtn = document.querySelector('#subtract');
-const exponentbtn = document.querySelector('#exponent');
+
 const clearbtn = document.querySelector('#clear');
 const equalbtn = document.querySelector('#equal');
 
-const button = document.querySelectorAll(button);
-/*  */
+const button = document.querySelectorAll('button');
+/*   backspace   */
 
 button.forEach(btn=>btn.addEventListener('click', buttonPress))
 
-
-  
 let input = [];
-let result = ''
+let result = 0;
+let dotStatus = false;
+
 
 function buttonPress() {
-  if (input.length == 0) {
+  if (this.id == 'clear') {return clear()}
+  if (input.length == 0) { /* if first input */
     if (this.id == 'number') {
-      return input[0] = this.textContent} else {return 'error'}
-    }
-
-
-  if (this.id == 'number') {
-    input[input.length-1] += this.textContent
-  } else {
-    input[input.length] = `${this.id}`   
-
+      input[0] = this.textContent
+      return updateDisplay()
+    } else if (this.id == 'pi') {addPi(); return updateDisplay()
+    } else if (this.id == 'operand') {return}
   }
-  
-  check(input)
-
+  if (this.id === 'pi') {
+    addPi()
+  }
+  if (this.id == 'dot') {
+    if (dotStatus === false) {
+      if (checkLastInput() === 'operand') {
+        input[input.length] = '0.';
+      }else {
+      input[input.length-1] += '.';
+      }
+    } 
+  }
+  if (this.id == 'number') {
+    if (checkLastInput() === 'operand') {
+      input[input.length] = this.textContent;
+    } else {
+        input[input.length-1] += this.textContent ;
+      } 
+  }
+  if (this.id == 'operand'){
+    if (checkLastInput() === 'operand') {input.splice(input.length-1)};
+    if (this.textContent == '^') {input[input.length] = '^'};
+    if (this.textContent == '*') {input[input.length] = '*'};
+    if (this.textContent == '/') {input[input.length] = '/'};
+    if (this.textContent == '+') {input[input.length] = '+'};
+    if (this.textContent == '-') {input[input.length] = '-'};
+    }
+  if (this.id == 'equal') {
+    return pressEqual();
+  }
+  if (this.id == 'soundbtn') {
+    if (soundStatus == 'on') {
+      return soundStatus = 'off'
+    } else if (soundStatus == 'off'){return soundStatus = 'on'}
+  }
+checkDotStatus()
+updateDisplay()
 }
-
 function pressEqual () {
-  let inputInNums = test.map(turnToNumber)
-  result = calculate (inputInNums)
+  let inputInNums = input.map(turnToNumber)
+  result = calculate(inputInNums)
+  clear()
+  result = Math.round(result * 100)/100
+  if (result == Infinity) {
+    clear()
+    return alert('You cannot divide by zero, fool!')}
+  display.textContent = result
+  if (display.textContent === 'NaN') {return errorMsg()}
+  input[0] = result 
 
 }
+function updateDisplay() {
+  let displayText = input.reduce((a,b)=>a + b)
+  display.textContent = displayText
+}
+function checkLastInput (){
 
-
+  if (input[input.length-1] == '^' || input[input.length-1] == '*' ||input[input.length-1] == '/'||input[input.length-1] == '-'||input[input.length-1] == '+' ) {
+    return 'operand'
+  } else {return 'number'}
+  
+}
+function clear () {
+  input.splice(0)
+  display.textContent = ""
+}
 function turnToNumber (str) {
   if (str == '^'||str == '*'||str == '/'||str == '+'||str == '-') {return str}
   return Number(str)
@@ -78,22 +124,36 @@ function calculate (arr) {
             let sum = arr[i-1] + arr[i+1];
           arr.splice(i-1,3,sum); 
           i--;
-          check(arr);
-
           } 
           if (arr[i]=== '-' ){
           let difference = arr[i-1] - arr[i+1];
           arr.splice(i-1,3,difference); 
-          i--;
-          check(arr);
+          i--;  
           }
         }
       }
   return arr[0]
 }
-
-function check (a) {
-  console.log(a)}
+function errorMsg(){
+  clear()
+  display.textContent = "ERROR"
+}
+function addPi () {
+  if (checkLastInput() === 'operand' || input.length == 0) {
+    input[input.length] = 3.141592
+  } else {
+      input[input.length] = '*';
+      input[input.length] = '3.141592'
+    } 
+}
+function checkDotStatus () {
+  let regex = /\./
+  let lastStr = input[input.length-1]
+  let dotCheck = lastStr.search(regex)
+  if (dotCheck === -1) {return dotStatus = false} else {return dotStatus = true}
+  
+}
+function check (a) {console.log(a)}
 
 
 
@@ -104,24 +164,27 @@ function check (a) {
 
 /* button sounds */ 
 let sound = true
+let soundStatus = 'on'
 const btn = Array.from(document.querySelectorAll(".btn"));
 btn.forEach(btn=> btn.addEventListener('click', playSound));
 
-  function playSound() {
-    if (this.id == 'equal') {
-        const calc = document.querySelector("#calculating");
-        calc.play();
-    } else {
-      const beep = document.querySelector("#beep");
-      const boop = document.querySelector("#boop");
-      if (sound == true) {
-          beep.currentTime = 0;
-          beep.play();
-          return sound = false
-      } else if (sound == false) {
-          boop.currentTime = 0;
-          boop.play(); 
-          return sound = true
-    }
-    }
+function playSound() {
+    if (soundStatus == 'on')  {
+      if (this.id == 'equal') {
+            const calc = document.querySelector("#calculating");
+            calc.play();
+        } else {
+          const beep = document.querySelector("#beep");
+          const boop = document.querySelector("#boop");
+          if (sound == true) {
+              beep.currentTime = 0;
+              beep.play();
+              return sound = false
+          } else if (sound == false) {
+              boop.currentTime = 0;
+              boop.play(); 
+              return sound = true
+            }
+          }
+    } 
   }
