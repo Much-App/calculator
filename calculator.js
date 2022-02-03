@@ -1,8 +1,6 @@
 const display = document.querySelector('#display');
 
 
-const clearbtn = document.querySelector('#clear');
-const equalbtn = document.querySelector('#equal');
 
 const button = document.querySelectorAll('button');
 /*   backspace   */
@@ -15,7 +13,6 @@ let dotStatus = false;
 
 
 function buttonPress() {
-  if (this.id == 'clear') {return clear()}
   if (input.length == 0) { /* if first input */
     if (this.id == 'number') {
       input[0] = this.textContent
@@ -58,7 +55,13 @@ function buttonPress() {
       return soundStatus = 'off'
     } else if (soundStatus == 'off'){return soundStatus = 'on'}
   }
-checkDotStatus()
+  if (this.id == 'clear') {
+    return clear()
+  }
+  if (this.id == 'backspace') {
+    backspace()
+  }
+  if (checkLastInput() == 'number')  {checkDotStatus()}
 updateDisplay()
 }
 function pressEqual () {
@@ -71,10 +74,12 @@ function pressEqual () {
     return alert('You cannot divide by zero, fool!')}
   display.textContent = result
   if (display.textContent === 'NaN') {return errorMsg()}
-  input[0] = result 
+  input[0] = result.toString()
 
 }
 function updateDisplay() {
+  if (input[input.length-1] == '') {input.splice(input.length-1)}
+  if (input.length == 0) {return display.textContent = ''}
   let displayText = input.reduce((a,b)=>a + b)
   display.textContent = displayText
 }
@@ -149,11 +154,19 @@ function addPi () {
 function checkDotStatus () {
   let regex = /\./
   let lastStr = input[input.length-1]
-  let dotCheck = lastStr.search(regex)
-  if (dotCheck === -1) {return dotStatus = false} else {return dotStatus = true}
+  return dotStatus = regex.test(lastStr)
   
 }
-function check (a) {console.log(a)}
+function backspace (){
+  if (checkLastInput() == 'operand') {
+    input.splice(input.length-1) }
+    else if (checkLastInput() == 'number') {
+      let lastElement = input[input.length-1]
+      let newLastElem = lastElement.slice(0,lastElement.length-1)
+      input[input.length-1] = newLastElem
+  }
+}
+function cl (a) {console.log(a)}
 
 
 
